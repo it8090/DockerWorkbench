@@ -172,8 +172,11 @@ func (s *Store) Preferences() (map[string]string, error) {
 	return out, rows.Err()
 }
 func (s *Store) SetPreference(key, value string) error {
-	if key != "language" && key != "theme" && key != "layout" && key != "activeWorkspace" {
+	if key != "language" && key != "theme" && key != "layout" && key != "activeWorkspace" && key != "updates.automatic" {
 		return Fail("invalid_request", "Unknown preference", nil)
+	}
+	if key == "updates.automatic" && value != "true" && value != "false" {
+		return Fail("invalid_request", "Update preference must be true or false", nil)
 	}
 	if key == "activeWorkspace" {
 		if e := s.requireWorkspace(value); e != nil {

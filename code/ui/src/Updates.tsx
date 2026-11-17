@@ -149,9 +149,14 @@ export function Updates({ disabled }: { disabled: boolean }) {
                 </p>
               </div>
             )}
-            {(state.error || preferenceError) && (
+            {state.error && (
               <p role="alert" className="update-error">
-                {state.error || preferenceError}
+                {state.error}
+              </p>
+            )}
+            {preferenceError && (
+              <p role="alert" className="update-error">
+                {preferenceError}
               </p>
             )}
             <label className="update-preference">
