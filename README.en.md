@@ -22,12 +22,13 @@ Built with **Tauri 2 + React / TypeScript + Go**, with Simplified Chinese and En
 | Container actions | Start, stop, and restart with target previews, per-target results, and persistent history |
 | Compose deployment | Pull / Up / Recreate / Down after binding original Compose files; configuration rechecked before execution |
 | Configuration transfer | Preview imports from SSH config, Docker contexts, or application JSON; import and export within the current workspace |
+| Single instance | Repeated launches restore and focus the existing window without creating another core process |
 | Software updates | Startup or manual checks, download progress, signature verification, installation and restart; automatic checking can be disabled |
 | Desktop experience | Instant language switching, themes, object tabs, global search, adjustable details, and a compact macOS title bar |
 
 ## Version and platform status
 
-The current source version is **0.1.4**, an early version. Download installers and checksums from [GitHub Releases](https://github.com/it8090/DockerWorkbench/releases/latest). Platform verification remains as described below.
+The current source version is **0.1.5**, an early version. Download installers and checksums from [GitHub Releases](https://github.com/it8090/DockerWorkbench/releases/latest). Platform verification remains as described below.
 
 | Platform | Verification to date |
 | --- | --- |

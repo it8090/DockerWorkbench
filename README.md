@@ -22,12 +22,13 @@
 | 容器操作 | 启动、停止、重启；执行前预览目标，逐项显示结果并保存操作记录 |
 | Compose 部署 | 关联原始 Compose 文件后执行 Pull / Up / Recreate / Down，执行前复核配置变化 |
 | 配置迁移 | 预览导入 SSH config、Docker contexts 和应用 JSON；导入导出按当前工作空间处理 |
+| 单实例运行 | 重复启动时恢复并聚焦已有窗口，不重复创建核心进程 |
 | 软件更新 | 启动时检查或手动检查，下载进度、签名校验、安装与重启；支持关闭自动检查 |
 | 桌面体验 | 中英文即时切换、明暗主题、多对象标签、全局搜索、可调整详情区；macOS 紧凑标题栏 |
 
 ## 版本与平台
 
-当前源码版本为 **0.1.4**，处于早期阶段。安装包和校验值见 [GitHub Releases](https://github.com/it8090/DockerWorkbench/releases/latest)，各平台验证范围如下。
+当前源码版本为 **0.1.5**，处于早期阶段。安装包和校验值见 [GitHub Releases](https://github.com/it8090/DockerWorkbench/releases/latest)，各平台验证范围如下。
 
 | 平台 | 当前验证情况 |
 | --- | --- |

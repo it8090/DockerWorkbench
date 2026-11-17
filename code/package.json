@@ -1,6 +1,6 @@
 {
   "name": "docker-workbench",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "Docker desktop workspace built with Tauri, React and Go",
   "license": "MIT",
   "private": true,

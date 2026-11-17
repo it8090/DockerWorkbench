@@ -27,7 +27,7 @@ func (m *Manager) Dispatch(ctx context.Context, method string, raw json.RawMessa
 	}
 	switch method {
 	case "system.info":
-		return map[string]any{"version": "0.1.4", "os": runtime.GOOS, "arch": runtime.GOARCH, "dataDirectory": m.Store.Directory, "languages": []string{"zh-CN", "en"}}, nil
+		return map[string]any{"version": "0.1.5", "os": runtime.GOOS, "arch": runtime.GOARCH, "dataDirectory": m.Store.Directory, "languages": []string{"zh-CN", "en"}}, nil
 	case "preferences.get":
 		return m.Store.Preferences()
 	case "preferences.set":

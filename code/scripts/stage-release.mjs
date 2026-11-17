@@ -22,7 +22,10 @@ const updaterExtension = {
 }[platform];
 if (!updaterExtension || !bundle)
   throw new Error("Expected a supported --platform and --bundle directory");
-const version = JSON.parse(readFileSync(join(root, "package.json"))).version;
+const { version } = JSON.parse(readFileSync(join(root, "package.json")));
+const { productName } = JSON.parse(
+  readFileSync(join(root, "src-tauri/tauri.conf.json")),
+);
 const repository = process.env.GITHUB_REPOSITORY || "it8090/DockerWorkbench";
 const destination = join(root, "outputs/release", platform);
 mkdirSync(destination, { recursive: true });
@@ -40,11 +43,23 @@ function walk(directory) {
 }
 walk(resolve(root, bundle));
 let update;
+const staged = new Set();
 for (const path of paths) {
   const extension = path.endsWith(".app.tar.gz")
     ? ".app.tar.gz"
     : path.slice(path.lastIndexOf("."));
   const filename = `DockerWorkbench_${version}_${platform}${extension}`;
+  // Rust build caches may retain installers from previous versions.
+  if (
+    extension === ".app.tar.gz"
+      ? !path.endsWith(`/${productName}.app.tar.gz`) &&
+        !path.endsWith(`\\${productName}.app.tar.gz`)
+      : !path.split(/[\\/]/).at(-1).includes(version)
+  )
+    continue;
+  if (staged.has(filename))
+    throw new Error(`Duplicate installer for ${platform}: ${filename}`);
+  staged.add(filename);
   copyFileSync(path, join(destination, filename));
   if (extension === updaterExtension) {
     if (update) throw new Error(`Multiple update bundles for ${platform}`);
