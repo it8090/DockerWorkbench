@@ -32,10 +32,10 @@
 
 | 平台 | 当前验证情况 |
 | --- | --- |
-| macOS 13+ / Apple Silicon | 已在开发环境构建并运行 `.app` / `.dmg` |
-| macOS / Intel | Go 核心交叉编译通过，桌面安装运行待验证 |
-| Windows / x64 | Go 核心交叉编译通过，桌面安装运行及 Named Pipe 待验证 |
-| Linux / x64 | Go 核心交叉编译通过，桌面安装运行及原生集成待验证 |
+| macOS 13+ / Apple Silicon | 本机已构建并运行 `.app` / `.dmg`，GitHub Actions 构建已通过 |
+| macOS / Intel | 已构建 DMG，原生安装运行待验证 |
+| Windows / x64 | 已构建 NSIS 安装包，桌面运行及 Named Pipe 待验证 |
+| Linux / x64 | 已构建 AppImage / deb，桌面运行及原生集成待验证 |
 
 现有 macOS 构建采用本地 ad-hoc 签名，尚未完成 Developer ID 签名和公证。仓库提供三平台 CI 构建配置，实际结果以仓库 Actions 为准；软件更新通过 GitHub Releases 分发并强制验证签名。
 

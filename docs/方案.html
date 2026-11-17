@@ -34,7 +34,7 @@
 <p>语言标识使用 zh-CN / en，首次根据系统语言选择，随后使用 SQLite 中的用户偏好。词条通过 TypeScript 键约束，自动化测试比较词条完整性、英文中未翻译中文和变量替换。界面状态、操作预览、表单、历史动作和错误摘要随语言切换；时间使用本地时区与语言格式。</p>
 <p>新增语言时补充词条目录、语言选择项与完整性测试，不在业务组件中复制页面。引擎原始错误与业务日志不自动翻译，保留可排障信息。</p>
 <h2 id="section-87">七、平台、构建与验收</h2>
-<table><thead><tr><th>平台</th><th>目标</th><th>当前证据</th></tr></thead><tbody><tr><td>macOS</td><td>13+ arm64 / Intel</td><td>arm64 .app / .dmg 构建运行；Intel Go 核心交叉编译</td></tr><tr><td>Windows</td><td>Windows 10 / 11 x64</td><td>Go 核心交叉编译；Named Pipe 适配与原生 CI 已配置，桌面运行待验收</td></tr><tr><td>Linux</td><td>Ubuntu 22.04+ x64</td><td>Go 核心交叉编译；原生 CI 已配置，WebKitGTK / Secret Service 桌面运行待验收</td></tr></tbody></table>
+<table><thead><tr><th>平台</th><th>目标</th><th>当前证据</th></tr></thead><tbody><tr><td>macOS</td><td>13+ arm64 / Intel</td><td>arm64 本机构建运行；arm64 / Intel DMG 已由 GitHub Actions 构建</td></tr><tr><td>Windows</td><td>Windows 10 / 11 x64</td><td>NSIS 安装包已由 GitHub Actions 构建；桌面运行及 Named Pipe 待验收</td></tr><tr><td>Linux</td><td>Ubuntu 22.04+ x64</td><td>AppImage / deb 已由 GitHub Actions 构建；WebKitGTK / Secret Service 桌面运行待验收</td></tr></tbody></table>
 <p>CI 参考官方三平台构建依赖，分别执行测试、核心构建、Tauri 打包并上传产物，不创建公开 Release。<a href="https://v2.tauri.app/distribute/pipelines/github/">Tauri GitHub 构建</a></p>
 <p>当前 macOS 包是本地开发签名，未使用 Developer ID 或公证。Windows/Linux 原生安装验收与签名仍是正式发行的必要条件。历史测试证据见 <a href="实施与验收.md">实施与验收</a>，当前 CI 结果以仓库 Actions 为准；早期原型验收记录单独保留，内部调研截图不随公开仓库分发。</p>
 <h2 id="section-99">八、软件更新与发行</h2>

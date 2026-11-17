@@ -32,10 +32,10 @@ The current source version is **0.1.5**, an early version. Download installers a
 
 | Platform | Verification to date |
 | --- | --- |
-| macOS 13+ / Apple Silicon | `.app` / `.dmg` built and run in the development environment |
-| macOS / Intel | Go core cross-compiled; desktop installation and runtime verification pending |
-| Windows / x64 | Go core cross-compiled; desktop runtime and named pipe verification pending |
-| Linux / x64 | Go core cross-compiled; desktop runtime and native integration verification pending |
+| macOS 13+ / Apple Silicon | `.app` / `.dmg` built and run locally; GitHub Actions build passed |
+| macOS / Intel | DMG built; native installation and runtime verification pending |
+| Windows / x64 | NSIS installer built; desktop runtime and named pipe verification pending |
+| Linux / x64 | AppImage / deb built; desktop runtime and native integration verification pending |
 
 Existing macOS builds use ad-hoc signing and have not been Developer ID signed or notarized. A three-platform CI workflow is included; consult the repository's Actions for actual results. Software updates are distributed through GitHub Releases and require valid signatures.
 
