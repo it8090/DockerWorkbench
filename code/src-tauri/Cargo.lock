@@ -819,6 +819,7 @@ dependencies = [
 name = "docker-workbench"
 version = "0.1.5"
 dependencies = [
+ "reqwest",
  "serde",
  "serde_json",
  "tauri",
