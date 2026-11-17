@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self' data: blob:; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'none'; object-src 'none'; base-uri 'none'">
+  <title>Docker Workbench · 交互原型</title>
+  <link rel="icon" href="assets/mark.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="assets/workbench.css">
+  <script src="assets/data.js" defer></script>
+  <script src="assets/workbench.js" defer></script>
+</head>
+<body>
+  <div id="app">
+    <header class="appbar">
+      <button class="icon-button mobile-menu" data-action="toggle-sidebar" aria-label="显示资源树">☰</button>
+      <a class="brand" href="index.html"><img src="assets/mark.svg" alt="" width="27" height="27"><strong>Docker Workbench</strong><span class="version">设计预览</span></a>
+      <div class="appbar-center">工作空间 <span>/</span> Demo</div>
+      <button class="command-button" data-action="command"><span data-icon="search"></span><span>搜索资源或操作</span><kbd>⌘ K</kbd></button>
+      <button class="icon-button" data-action="theme" title="切换明暗主题" aria-label="切换明暗主题" data-icon="theme"></button>
+      <button class="primary" data-action="connections"><span data-icon="plus"></span>添加连接</button>
+    </header>
+    <div class="prototype-notice"><span class="notice-dot"></span><strong>交互原型</strong><span>示例状态与日志 · 未连接服务器 · 所有操作仅在当前页面模拟</span><button data-action="help">查看方案</button></div>
+    <div class="workspace">
+      <aside class="sidebar" id="sidebar">
+        <div class="sidebar-heading"><strong>资源管理器</strong><div><button class="icon-button" data-action="refresh" aria-label="刷新示例资源" data-icon="refresh"></button><button class="icon-button" data-action="collapse" aria-label="折叠所有主机" data-icon="collapse"></button></div></div>
+        <label class="searchbox"><span data-icon="search"></span><input id="tree-search" placeholder="筛选主机、项目、容器" aria-label="筛选资源"><kbd>/</kbd></label>
+        <div class="tree-caption"><span>连接</span><span id="connection-count">6</span></div>
+        <nav id="resource-tree" class="resource-tree" aria-label="Docker 资源树"></nav>
+        <div class="sidebar-bottom"><button data-action="connections"><span data-icon="settings"></span>连接与 SSH 配置</button><button data-action="import"><span data-icon="import"></span>导入现有连接</button></div>
+      </aside>
+      <main id="main">
+        <div class="workspace-tabs"><button class="workspace-tab active" data-action="project-home"><span data-icon="stack"></span><span id="workspace-name">report</span><span class="tab-dot"></span></button><div class="workspace-fill"></div><button class="plain-button" data-action="history"><span data-icon="history"></span>操作记录 <span id="history-count" class="count">0</span></button></div>
+        <div class="resource-header">
+          <div class="breadcrumb" id="breadcrumb"></div>
+          <div class="resource-title-row"><div class="resource-title"><span class="large-icon" data-icon="stack"></span><div><h1 id="resource-title">report</h1><p id="resource-subtitle">Docker Compose 项目</p></div><span class="environment-badge">生产</span></div><div class="object-actions" id="object-actions"></div></div>
+          <div class="resource-summary" id="resource-summary"></div>
+        </div>
+        <section class="resource-panel" aria-label="资源列表">
+          <div class="panel-toolbar"><div class="resource-filters" id="resource-filters"></div><div class="toolbar-end"><span class="helper-text" id="selection-caption">点击容器查看详情</span><button class="icon-button" data-action="clear-selection" title="返回项目合并日志" aria-label="返回项目合并日志" data-icon="layers"></button></div></div>
+          <div class="table-scroll" id="resource-table"></div>
+        </section>
+        <div class="split-handle" role="separator" tabindex="0" aria-label="调整服务列表与详情区高度" aria-orientation="horizontal"><span></span></div>
+        <section class="detail-panel" aria-label="资源详情">
+          <div class="detail-header"><div class="detail-tabs" id="detail-tabs"></div><span id="detail-target" class="detail-target">report / 合并日志</span><button class="icon-button" data-action="maximize" aria-label="展开详情区域" data-icon="maximize"></button></div>
+          <div id="detail-content" class="detail-content"></div>
+        </section>
+      </main>
+    </div>
+    <footer class="statusbar"><div><span class="status-dot"></span><span id="status-connection">示例会话</span><span class="status-divider"></span><span id="status-api">API 自动协商 · 1.43</span></div><div><span id="status-message">模拟数据已就绪</span><span class="status-divider"></span><button data-action="reset">重置演示</button></div></footer>
+  </div>
+  <dialog id="connection-dialog" class="connection-dialog" aria-labelledby="connection-title"></dialog>
+  <dialog id="action-dialog" class="action-dialog" aria-labelledby="action-title"></dialog>
+  <dialog id="command-dialog" class="command-dialog" aria-label="资源与操作搜索"></dialog>
+  <dialog id="help-dialog" class="help-dialog" aria-label="方案与原型说明"></dialog>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+</body>
+</html>

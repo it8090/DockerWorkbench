@@ -1,0 +1,148 @@
+name: 构建与发布安装包
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 已推送的版本标签，例如 v0.1.4
+        required: true
+        type: string
+permissions:
+  contents: read
+concurrency:
+  group: release-${{ inputs.tag || github.ref_name }}
+  cancel-in-progress: false
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: macos-latest
+            target: aarch64-apple-darwin
+            goos: darwin
+            goarch: arm64
+            platform: darwin-aarch64
+            bundles: app,dmg
+          - os: macos-latest
+            target: x86_64-apple-darwin
+            goos: darwin
+            goarch: amd64
+            platform: darwin-x86_64
+            bundles: app,dmg
+          - os: windows-latest
+            target: x86_64-pc-windows-msvc
+            goos: windows
+            goarch: amd64
+            platform: windows-x86_64
+            bundles: nsis
+          - os: ubuntu-22.04
+            target: x86_64-unknown-linux-gnu
+            goos: linux
+            goarch: amd64
+            platform: linux-x86_64
+            bundles: deb,appimage
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        working-directory: code
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ inputs.tag || github.ref }}
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.14.4
+          package_json_file: code/package.json
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: pnpm
+          cache-dependency-path: code/pnpm-lock.yaml
+      - uses: actions/setup-go@v6
+        with:
+          go-version-file: code/core/go.mod
+          cache-dependency-path: code/core/go.sum
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
+          components: rustfmt
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: code/src-tauri -> target
+          key: ${{ matrix.target }}
+      - name: 安装 Linux 桌面依赖
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev build-essential libssl-dev libxdo-dev libayatana-appindicator3-dev librsvg2-dev patchelf libfuse2 xdg-utils
+      - run: pnpm install --frozen-lockfile
+      - name: 校验版本标签
+        env:
+          RELEASE_TAG: ${{ inputs.tag || github.ref_name }}
+        run: node --input-type=module -e "import fs from 'node:fs'; const v=JSON.parse(fs.readFileSync('package.json')).version; if(process.env.RELEASE_TAG !== 'v'+v) throw new Error('版本标签与源码不一致');"
+      - run: pnpm test
+      - name: 验证 Go 核心
+        if: runner.os != 'Windows'
+        working-directory: code/core
+        run: go test -race ./...
+      - name: 验证 Windows 核心
+        if: runner.os == 'Windows'
+        working-directory: code/core
+        run: go test ./...
+      - run: cargo fmt --manifest-path src-tauri/Cargo.toml -- --check
+      - name: 构建并签署更新包
+        env:
+          BUILD_GOOS: ${{ matrix.goos }}
+          BUILD_GOARCH: ${{ matrix.goarch }}
+          BUILD_TARGET: ${{ matrix.target }}
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+        run: pnpm desktop:build --ci --target ${{ matrix.target }} --bundles ${{ matrix.bundles }}
+      - name: 整理平台安装包
+        run: node scripts/stage-release.mjs --platform ${{ matrix.platform }} --bundle src-tauri/target/${{ matrix.target }}/release/bundle
+      - uses: actions/upload-artifact@v4
+        with:
+          name: release-${{ matrix.platform }}
+          path: code/outputs/release/${{ matrix.platform }}/*
+          if-no-files-found: error
+          retention-days: 14
+  publish:
+    needs: build
+    runs-on: ubuntu-22.04
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ inputs.tag || github.ref }}
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: release-*
+          merge-multiple: true
+          path: release-assets
+      - name: 安装签名验证工具
+        run: sudo apt-get update && sudo apt-get install -y minisign
+      - name: 验证四个平台签名并生成更新清单
+        run: node code/scripts/assemble-release.mjs release-assets
+      - name: 发布经过完整验证的安装包
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RELEASE_TAG: ${{ inputs.tag || github.ref_name }}
+        shell: bash
+        run: |
+          version="${RELEASE_TAG#v}"
+          if gh release view "$RELEASE_TAG" --json isDraft --jq '.isDraft' > release-state.txt 2>/dev/null; then
+            test "$(cat release-state.txt)" = "true" || { echo "该版本已公开发布，拒绝覆盖。"; exit 1; }
+          else
+            gh release create "$RELEASE_TAG" --verify-tag --draft --title "Docker Workbench $version" --notes-file "docs/releases/$version.md"
+          fi
+          for asset in release-assets/*; do
+            case "$(basename "$asset")" in update-*.json) continue ;; esac
+            gh release upload "$RELEASE_TAG" "$asset" --clobber
+          done
+          gh release edit "$RELEASE_TAG" --draft=false --prerelease=false --latest

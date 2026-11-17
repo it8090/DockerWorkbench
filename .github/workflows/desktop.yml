@@ -1,0 +1,69 @@
+name: 桌面构建与验证
+on:
+  workflow_dispatch:
+  push:
+    branches: [main, master]
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-latest, windows-latest, ubuntu-22.04]
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        working-directory: code
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.14.4
+          package_json_file: code/package.json
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: pnpm
+          cache-dependency-path: code/pnpm-lock.yaml
+      - uses: actions/setup-go@v6
+        with:
+          go-version-file: code/core/go.mod
+          cache-dependency-path: code/core/go.sum
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: code/src-tauri -> target
+      - name: 安装 Linux 桌面依赖
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev build-essential libssl-dev libxdo-dev libayatana-appindicator3-dev librsvg2-dev patchelf libfuse2 xdg-utils
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm test
+      - name: 验证 Go 核心
+        if: runner.os != 'Windows'
+        working-directory: code/core
+        run: go test -race ./...
+      - name: 验证 Windows 核心
+        if: runner.os == 'Windows'
+        working-directory: code/core
+        run: go test ./...
+      - run: cargo fmt --manifest-path src-tauri/Cargo.toml -- --check
+      - name: 构建本机架构桌面包
+        run: pnpm desktop:build --ci --config src-tauri/tauri.ci.conf.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: DockerWorkbench-${{ runner.os }}-${{ runner.arch }}
+          path: |
+            code/src-tauri/target/release/bundle/**/*.dmg
+            code/src-tauri/target/release/bundle/**/*.msi
+            code/src-tauri/target/release/bundle/**/*.exe
+            code/src-tauri/target/release/bundle/**/*.deb
+            code/src-tauri/target/release/bundle/**/*.AppImage
+            code/src-tauri/target/release/bundle/**/*.rpm
+          if-no-files-found: error
+          retention-days: 14

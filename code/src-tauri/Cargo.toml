@@ -1,0 +1,22 @@
+[package]
+name = "docker-workbench"
+version = "0.1.4"
+edition = "2021"
+description = "Cross-platform Docker management workbench"
+license = "MIT"
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = [] }
+tauri-plugin-dialog = "2"
+tauri-plugin-updater = "2"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+tokio = { version = "1", features = ["sync", "time"] }
+
+[profile.release]
+strip = true
+lto = true
+codegen-units = 1

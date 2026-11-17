@@ -1,0 +1,56 @@
+name: 缺陷报告 / Bug report
+description: 报告可复现的问题 / Report a reproducible problem
+body:
+  - type: markdown
+    attributes:
+      value: |
+        请使用中文或 English。安全漏洞请按 SECURITY.md 私下报告。
+        Redact hostnames, addresses, credentials, and business data from all attachments.
+  - type: input
+    id: version
+    attributes:
+      label: 应用版本 / App version
+      placeholder: 0.1.3 或 commit SHA
+    validations:
+      required: true
+  - type: input
+    id: platform
+    attributes:
+      label: 系统与架构 / OS and architecture
+      placeholder: macOS 15 / arm64
+    validations:
+      required: true
+  - type: dropdown
+    id: transport
+    attributes:
+      label: 连接方式 / Transport
+      options:
+        - 不涉及连接 / Not applicable
+        - SSH
+        - Unix Socket
+        - Windows Named Pipe
+        - TCP + TLS
+  - type: input
+    id: engine
+    attributes:
+      label: Docker Engine 与 API 版本（如相关） / Engine and API versions, if relevant
+      placeholder: Docker 24.0.7 / API 1.43
+  - type: textarea
+    id: steps
+    attributes:
+      label: 复现步骤 / Steps to reproduce
+      description: 使用模拟或已脱敏的环境描述 / Use a fixture or redacted environment.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: 预期行为 / Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: 实际行为及脱敏证据 / Actual behavior and redacted evidence
+    validations:
+      required: true

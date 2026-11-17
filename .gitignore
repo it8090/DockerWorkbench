@@ -1,0 +1,30 @@
+# Local outputs and build products (code/.gitignore adds source-specific rules).
+.DS_Store
+**/node_modules/
+**/target/
+**/dist/
+**/outputs/
+/code/releases/
+
+# Historical screenshots and IDE reference images contain private environment data.
+# Add new, redacted product screenshots under docs/images/ instead.
+/screenshots/
+/code/refs/
+
+# Local connection data and credentials.
+*.sqlite*
+*.db
+*.db-wal
+*.db-shm
+*.log
+.env
+.env.*
+!.env.example
+*.local
+*.pem
+*.key
+*.p12
+*.pfx
+id_rsa*
+id_ed25519*
+__pycache__/
