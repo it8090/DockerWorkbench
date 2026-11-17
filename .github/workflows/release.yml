@@ -8,6 +8,10 @@ on:
         description: 已推送的版本标签，例如 v0.1.4
         required: true
         type: string
+      build_run_id:
+        description: 可选：复用已成功构建四个平台的工作流 Run ID，仅重试发布
+        required: false
+        type: string
 permissions:
   contents: read
 concurrency:
@@ -15,6 +19,7 @@ concurrency:
   cancel-in-progress: false
 jobs:
   build:
+    if: ${{ !inputs.build_run_id }}
     strategy:
       fail-fast: false
       matrix:
@@ -109,10 +114,12 @@ jobs:
           if-no-files-found: error
           retention-days: 14
   publish:
+    if: ${{ always() && !cancelled() && (needs.build.result == 'success' || inputs.build_run_id != '') }}
     needs: build
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     permissions:
       contents: write
+      actions: read
     steps:
       - uses: actions/checkout@v7
         with:
@@ -120,11 +127,32 @@ jobs:
       - uses: actions/setup-node@v6
         with:
           node-version: 24
+      - name: 核对复用构建的来源与结果
+        if: ${{ inputs.build_run_id }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          BUILD_RUN_ID: ${{ inputs.build_run_id }}
+        run: |
+          node --input-type=module <<'JS'
+          import { execFileSync } from 'node:child_process';
+          const id = process.env.BUILD_RUN_ID;
+          if (!/^\d+$/.test(id)) throw new Error('无效的构建 Run ID');
+          const repo = process.env.GITHUB_REPOSITORY;
+          const api = (path) => JSON.parse(execFileSync('gh', ['api', path], { encoding: 'utf8' }));
+          const run = api(`repos/${repo}/actions/runs/${id}`);
+          const sha = execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).trim();
+          if (run.head_sha !== sha) throw new Error('构建提交与发布标签不一致');
+          const builds = api(`repos/${repo}/actions/runs/${id}/jobs?per_page=100`).jobs.filter(job => job.name.startsWith('build ('));
+          if (builds.length !== 4 || builds.some(job => job.conclusion !== 'success')) throw new Error('四个平台必须全部构建成功');
+          console.log('已确认四个平台均通过，且提交与发布标签一致');
+          JS
       - uses: actions/download-artifact@v4
         with:
           pattern: release-*
           merge-multiple: true
           path: release-assets
+          run-id: ${{ inputs.build_run_id || github.run_id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
       - name: 安装签名验证工具
         run: sudo apt-get update && sudo apt-get install -y minisign
       - name: 验证四个平台签名并生成更新清单
